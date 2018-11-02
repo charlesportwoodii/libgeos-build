@@ -1,0 +1,50 @@
+sudo: required
+dist: trusty
+
+env:
+  - BUILD_IMAGE=bionic
+  - BUILD_IMAGE=xenial
+  - BUILD_IMAGE=trusty
+  - BUILD_IMAGE=centos7
+  - BUILD_IMAGE=rhel7
+  - BUILD_IMAGE=alpine3.6
+  - BUILD_IMAGE=alpine3.7
+  - BUILD_IMAGE=alpine3.8
+
+language: generic
+services:
+  - docker
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - mkdir -p build/deb/trusty build/deb/xenial build/deb/bionic build/rpm/CentOS/7/x86_64 build/rpm/RHEL/7/x86_64 build/alpine/v3.6/x86_64 build/alpine/v3.7/x86_64 build/alpine/v3.8/x86_64
+
+script:
+  - if [ -n "$TRAVIS_TAG" ]; then export VERSION=$( cut -d '-' -f 1 <<< "$TRAVIS_TAG" ) export RELEASEVER=$( cut -d '-' -f 2 <<< "$TRAVIS_TAG" ); echo "Setting versions via TravisCI Tag"; fi
+  - docker-compose run $BUILD_IMAGE
+  - if [ "$BUILD_IMAGE" == "trusty" ] || [ "$BUILD_IMAGE" == "xenial" ] || [ "$BUILD_IMAGE" == "bionic" ]; then mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE; fi
+  - if [ "$BUILD_IMAGE" == "centos7" ]; then mv *.rpm build/rpm/CentOS/7/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "rhel7" ]; then mv *.rpm build/rpm/RHEL/7/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "alpine3.6" ]; then mv *.apk build/alpine/v3.6/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "alpine3.7" ]; then mv *.apk build/alpine/v3.7/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "alpine3.8" ]; then mv *.apk build/alpine/v3.8/x86_64; fi
+  - find build -type f
+
+deploy:
+  provider: s3
+  access_key_id: AKIAINRCDYGMMTSHTIHA
+  bucket: travis-packages.erianna.com
+  detect_encoding: true
+  skip_cleanup: true
+  acl: public_read
+  region: us-west-2
+  local_dir: build
+  on:
+    tags: true
+    all_branches: false
+    repo: charlesportwoodii/libgeos-build
+  secret_access_key:
+    secure: CU7FUCKKkNvJKa6/tCW8hO/Y2C0RxIVTzEtgTVkOsPdg4kkeRjD7g/TeNUdVlJAgCJ+8ZTrX+VHiridkgPZ984hgsZ35ncT8/pSvzdy0RC6W4BgDZ9Yguejjp57Z4gY77s7fHCJFbfT/nnL0B1CZmVHXbE6CL8RcgwD0fX7IQ9FUYZlZWObw38t6CnEK0rQECS6hhOhPAXnUbTk8Bkq2Sa2C74nurBjgoK7UlUGu9BrjV3B5RPPzCqygCbM1nbIemwXf11LwyaaIJ3rAI3/VMu4alyI4QO1CgCAZW3tQj1okD5BbNEeRZjEuE8Ye89uZnp5c75QN/HU5QAvQanTBDD8oaKkfkC1NUsreA54TX2Iwv+FJZWfS/pLkjuRk+ucpDae6GqV42cdXAezEvgGLk+2pk8SWjYcO6g0OE3XanUncexU2lNFxFCl0EtF6ldzfKDb7aEs6kswxGEiYUnH2nVTKT2a/V9SayN8Zs1oTpn3aaij3a0fc+19KKZeF3VCAyleJEqF6K3YSfBpB8psUsTQunMxc+w7XJzDNlyKtA2zdn4xOpDNptLD9PawzQ3/7cmhm/F+711/8NjK4pMhIvkq9Fr/CA2PtFRBETdXYxqHEsYcO6jksayVcOGiPNdb5CQybWb7aHNL2Y0Hdau+8RXHrfxjgcfV413/1dEPKI8g=
