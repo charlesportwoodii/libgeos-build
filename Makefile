@@ -4,6 +4,9 @@ VERSION?=3.7.0
 RELEASEVER?=1
 SCRIPTPATH=$(shell pwd -P)
 
+major=$(shell echo $(VERSION) | cut -d. -f1)
+minor=$(shell echo $(VERSION) | cut -d. -f2)
+
 build: clean libgeos pre_package
 
 clean:
@@ -33,7 +36,7 @@ pre_package:
 fpm_debian:
 	fpm -s dir \
 		-t deb \
-		-n libgeos \
+		-n libgeos$(major).$(minor) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
 		-C /tmp/geos-install \
 		-p libgeos_$(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell arch).deb \
@@ -47,7 +50,7 @@ fpm_debian:
 fpm_rpm:
 	fpm -s dir \
 		-t rpm \
-		-n libgeos \
+		-n libgeos$(major).$(minor) \
 		-v $(VERSION)_$(RELEASEVER) \
 		-C /tmp/geos-install \
 		-p libgeos_$(VERSION)-$(RELEASEVER)_$(shell arch).rpm \
@@ -63,7 +66,7 @@ fpm_rpm:
 fpm_alpine:
 	fpm -s dir \
 		-t apk \
-		-n libgeos \
+		-n libgeos$(major).$(minor) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
 		-C /tmp/geos-install \
 		-p libgeos-$(VERSION)-$(RELEASEVER)~$(shell uname -m).apk \
