@@ -36,10 +36,10 @@ pre_package:
 fpm_debian:
 	fpm -s dir \
 		-t deb \
-		-n libgeos$(major).$(minor) \
+		-n libgeos$(major)$(minor) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
 		-C /tmp/geos-install \
-		-p libgeos_$(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell arch).deb \
+		-p libgeos$(major)$(minor)_$(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell arch).deb \
 		-m "charlesportwoodii@erianna.com" \
 		--license "GNU Lesser General Public License v2.1; https://github.com/libgeos/geos/blob/$(VERSION)/COPYING" \
 		--url https://github.com/charlesportwoodii/libgeos-build \
@@ -50,10 +50,10 @@ fpm_debian:
 fpm_rpm:
 	fpm -s dir \
 		-t rpm \
-		-n libgeos$(major).$(minor) \
+		-n libgeos$(major)$(minor) \
 		-v $(VERSION)_$(RELEASEVER) \
 		-C /tmp/geos-install \
-		-p libgeos_$(VERSION)-$(RELEASEVER)_$(shell arch).rpm \
+		-p libgeos$(major)$(minor)_$(VERSION)-$(RELEASEVER)_$(shell arch).rpm \
 		-m "charlesportwoodii@erianna.com" \
 		--license "GNU Lesser General Public License v2.1; https://github.com/libgeos/geos/blob/$(VERSION)/COPYING" \
 		--url https://github.com/charlesportwoodii/geos-build \
@@ -66,10 +66,10 @@ fpm_rpm:
 fpm_alpine:
 	fpm -s dir \
 		-t apk \
-		-n libgeos$(major).$(minor) \
+		-n libgeos$(major)$(minor) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
 		-C /tmp/geos-install \
-		-p libgeos-$(VERSION)-$(RELEASEVER)~$(shell uname -m).apk \
+		-p libgeos$(major)$(minor)-$(VERSION)-$(RELEASEVER)~$(shell uname -m).apk \
 		-m "charlesportwoodii@erianna.com" \
 		--license "GNU Lesser General Public License v2.1; https://github.com/libgeos/geos/blob/$(VERSION)/COPYING" \
 		--url https://github.com/charlesportwoodii/libgeos-build \
